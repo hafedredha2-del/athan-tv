@@ -103,3 +103,8 @@ Bien que l'application soit fonctionnelle, il reste des ajustements techniques e
 
 🤲 **Athan TV — تكنولوجيا ذكية، تربية هادفة، وذكر مستمر.**  
 *هذا العمل مُهدى لوجه الله تعالى كصدقة جارية. دعوة لكل مطور، مربي، وكل محب للخير للمساهمة معي في إتمامه وتطويره لوجه الله.*
+## 📱 Installation sur Android TV
+
+Vous pouvez installer directement l'application sur votre téléviseur via l'application **Downloader** en saisissant ce lien direct :
+
+`https://github.com/hafedredha2-del/athan-tv/releases/download/v1.1.0/athan-tv-v1.1.0.apk`
