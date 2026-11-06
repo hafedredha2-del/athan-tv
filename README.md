@@ -107,4 +107,4 @@ Bien que l'application soit fonctionnelle, il reste des ajustements techniques e
 
 Vous pouvez installer directement l'application sur votre téléviseur via l'application **Downloader** en saisissant ce lien direct :
 
-`https://github.com/hafedredha2-del/athan-tv/releases/download/v1.1.0/athan-tv-v1.1.0.apk`
+[Télécharger Athan TV v1.1.0](https://github.com/hafedredha2-del/athan-tv/releases/download/v1.1.0/athan-tv-v1.1.0.apk)
