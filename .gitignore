@@ -1,0 +1,7 @@
+# Fichiers binaires et builds
+*.apk
+platforms/
+plugins/
+node_modules/
+*.keystore
+.DS_Store

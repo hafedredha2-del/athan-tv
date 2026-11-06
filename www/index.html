@@ -1,0 +1,794 @@
+<!-- VERSION MASJID V38.6 - Masjid - CALIBRATED -->
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <script src="cordova.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <title>Athan TV V38 - Flash TV</title>
+  
+    <link rel="stylesheet" href="assets/css/style.css?v=39.1.01">
+</head>
+
+<body style="background: black; overflow: hidden; margin: 0; padding: 0;">
+    <script>
+        // === FINAL STABLE SHARE FUNCTION (V38.9.13) ===
+        window.shareApp = function() {
+            var url = (window.CONFIG && window.CONFIG.publicApkUrl) ? window.CONFIG.publicApkUrl : "https://drive.google.com/uc?export=download&id=1XPvtxsPdZG4aiV-6DNtvH2Cc2zUO0VCI";
+            var msg = "Tu00e9lu00e9chargez lu0027application Athan TV Masjid pour votre mosquu00e9e ou votre maison :";
+            if (window.plugins && window.plugins.socialsharing) {
+                window.plugins.socialsharing.share(msg, "Athan TV Masjid", null, url);
+            } else if (navigator.share) {
+                navigator.share({title: "Athan TV Masjid", text: msg, url: url});
+            } else {
+                var modal = document.getElementById("share-modal");
+                if (modal) { modal.classList.remove("hidden"); modal.style.display = "flex"; }
+                var linkEl = document.getElementById("apk-link");
+                if (linkEl) linkEl.innerText = url;
+                if (window.showToast) window.showToast("Lien pru00eat (Partage manuel)");
+            }
+        };
+
+        window.closeShareModal = function() {
+            var modal = document.getElementById('share-modal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.add('hidden');
+            }
+        };
+    </script>
+
+    <!-- Siyam Recovery (V38.1) - Top of body for absolute priority -->
+    <div class="fasting-widget hidden" id="fasting-widget">
+        <div class="fasting-text">
+            <span class="fasting-day"></span>
+        </div>
+    </div>
+
+
+    <div id="brightness-overlay"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; opacity: 0; pointer-events: none; z-index: 99999;">
+    </div>
+    <!-- Connection Status Indicator -->
+    <div id="connection-status" class="connection-indicator online" title="Status de connexion">
+        <svg class="wifi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+    </div>
+    <!-- V10.9.3: Double Layers for Cross-Fade -->
+    <div class="bg-media active" id="bg-layer-1"></div>
+    <div class="bg-media" id="bg-layer-2"></div>
+    <video id="bg-video" class="bg-media hidden" loop muted playsinline></video>
+
+    <!-- Overlay Gradient -->
+    <div class="overlay"></div>
+
+    <!-- Main Content -->
+    <div class="app-container">
+
+        <!-- Gemini Athan TV - V33.0: Title Image -->
+        <img id="app-title-image" src="assets/images/calligraphie.png" alt="Athan TV Title">
+
+        <!-- V35.1: FIXED DATES RESTORED -->
+        <div id="date-gregorian">
+            <span id="gregorian-text"></span>
+        </div>
+        <div id="date-hijri">
+            <span id="hijri-text"></span>
+        </div>
+
+        <!-- Left Panel: Weather, Next Prayer, Prayer List -->
+        <div class="left-panel">
+            <!-- Weather Removed (Moved to Right Panel) -->
+
+            <!-- SEPARATED PRAYER INFO ELEMENTS (V35.11) -->
+            <div class="next-prayer-container" id="next-prayer-container"
+                 style="z-index: 1000; display: flex !important; flex-direction: row !important; align-items: center !important; gap: 15px !important; white-space: nowrap !important; background: rgba(0,0,0,0.3); padding: 8px 20px; border-radius: 12px; backdrop-filter: blur(8px); border: 1px solid rgba(0, 229, 255, 0.2); pointer-events: auto !important; cursor: pointer !important;">
+                <span data-i18n="next_prayer"
+                    style="font-size: 1.1rem !important; color: rgba(255,255,255,0.8) !important; font-family: 'Aref Ruqaa', serif !important;">
+                    الصلاة القادمة:</span>
+                <span id="next-prayer-name"
+                    style="font-size: 1.5rem !important; color: #00e5ff !important; font-family: 'Aref Ruqaa', serif !important; font-weight: bold !important;">
+                    --</span>
+                <span id="next-prayer-countdown"
+                    style="font-size: 1.3rem !important; color: #00e5ff !important; font-family: 'Courier New', Courier, monospace !important; font-weight: bold !important; letter-spacing: 1px !important; margin-left: 10px; min-width: 100px; text-align: center;">
+                    --:--:--</span>
+                <!-- Stop button moved to body root -->
+            </div>
+
+            <!-- Prayer Times List (Vertical) -->
+            <div class="prayer-times-list" id="prayer-list"
+                style="z-index: 100;">
+                <!-- Moved MUCH HIGHER UP to ensure Isha is visible -->
+                <!-- Injected by JS -->
+            </div>
+
+            <!-- Fasting Widget moved to bottom for absolute positioning -->
+
+            <!-- Calligraphy Restored -->
+        </div>
+
+        <!-- Right Panel: Clock & Weather -->
+        <div class="right-panel">
+            <!-- Settings Button (Independent) -->
+            <button id="open-settings" style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; cursor: pointer;"><img src="assets/images/settings_btn.gif" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;mix-blend-mode:multiply;" alt="⚙️"/></button>
+
+
+
+            <!-- Unified Clock Widget (Clock + Weather) -->
+            <div id="unified-clock-widget" class="draggable-item"
+                style="position: fixed !important; top: 100px !important; left: 10px !important; transform: none !important; z-index: 100;">
+                <div id="clock-container" class="clock-plasma">
+                    <div class="time" id="clock-time">00:00</div>
+
+                    <!-- Integrated Weather Widget (Now part of the unit) -->
+                    <div class="weather-widget no-drag" id="weather-widget" onclick="if(window.showWeatherForecast)window.showWeatherForecast()" style="cursor:pointer; pointer-events: auto !important;">
+                        <button id="refresh-weather" class="refresh-btn" title="Actualiser météo">🔄</button>
+                        <div class="weather-icon" id="weather-icon">☀️</div>
+                        <div class="weather-info">
+                            <span class="city" data-i18n="city">SÉTIF</span>
+                            <div class="weather-details">
+                                <span class="temp" id="temp-text">--°C</span>
+                                <span class="desc" id="weather-text">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="seconds-ring"></div>
+                    <canvas id="visualizer-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Friday Blessing Widget -->
+            <div id="friday-blessing" class="draggable-item friday-overlay hidden"
+                style="position: fixed !important; top: calc(100px + 220px + 60px) !important; left: 10px !important; transform: none !important; width: auto !important; z-index: 100;">
+                <!-- Follows updated clock position -->
+                <!-- Dropped further down to avoid sticking to clock -->
+                <!-- Exactly 1cm (20px) under the clock unit (200px+shadow) -->
+                <!-- Exactly 1cm under the clock -->
+                <!-- 1cm (20px) under clock, aligned left -->
+                <span data-i18n="friday_blessing">اللهم صل على نبينا محمد ﷺ</span>
+            </div>
+
+            <!-- Weather Widget Moved Inside Clock -->
+        </div>
+
+    </div>
+    
+
+    <!-- Sunrise Sequence Overlay -->
+    <div id="sunrise-overlay"></div>
+
+    <!-- Athan Video Overlay -->
+    <div id="athan-player-container" class="hidden" style="opacity: 0;">
+        <video id="athan-video" playsinline style="width: 100%; height: 100%; object-fit: cover;">
+            <source src="assets/videos/athan_default.mp4" type="video/mp4">
+        </video>
+        <button id="close-athan" data-i18n="close"></button>
+    </div>
+
+    <!-- V10.0.0: Iqama Fullscreen Overlay (after Athan) -->
+    <div id="iqama-fullscreen" class="hidden">
+        <div class="iqama-content-new">
+            <div class="iqama-hadith">
+                <p class="hadith-arabic hadith-small blink-soft" data-i18n="iqama_silence">حافظ على أجر صلاتك وإخوانك بوضع هاتفك على الوضع الصامت</p>
+                <p class="hadith-arabic hadith-medium" data-i18n="iqama_dua">الدعاء بين الأذان والإقامة لا يرد</p>
+                <p class="hadith-arabic hadith-large" data-i18n="iqama_dua_2">اللَّهُمَّ إِنَّا نَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ</p>
+            </div>
+            <div class="iqama-timer">
+                <h3 id="iqama-label" data-i18n="iqama_after">الإقامة بعد</h3>
+                <div id="iqama-countdown-display">15:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="post-salat-athkars" class="hidden">
+        <!-- V11.0.0: Animated Background for Athkars -->
+        <video id="athkar-bg-video" loop muted playsinline preload="auto" class="athkar-video-bg hidden"
+            style="border:none !important; outline:none !important;"></video>
+
+        <!-- Simplified        <!-- Souhour Overlay Support -->
+        <div id="souhour-overlay"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:900; background:black;">
+            <img id="souhour-img" src="assets/images/sabah.jpg"
+                style="width:100%; height:100%; object-fit:cover; opacity:0.9;">
+            <div
+                style="position:absolute; bottom:20%; width:100%; text-align:center; color:white; font-size:4rem; text-shadow:2px 2px 15px black; font-family: var(--font-ar);">
+                وقت السحور</div>
+        </div>
+
+        <!-- Simplified Structure: Just content, no decorative frame -->
+        <div id="athkars-scroller"
+            style="display:flex; justify-content:center; align-items:center;">
+            <!-- Content populated by JavaScript -->
+        </div>
+
+        <button id="close-athkars" class="close-athkars-btn" data-i18n="close"></button>
+    </div>
+
+    <!-- Hybrid Athkar Overlay (Sabah/Massa) -->
+    <div id="hybrid-athkar-overlay">
+        <img id="hybrid-athkar-bg" src="">
+        <div class="hybrid-scroller-container">
+            <div class="athkars-scroll-track" id="hybrid-scroll-track">
+                <!-- Text content here -->
+            </div>
+        </div>
+        <button id="close-hybrid-athkar" class="close-athkars-btn" style="z-index: 1000;" data-i18n="close"></button>
+    </div>
+
+    <!-- Full Quran Player Modal -->
+    <div id="quran-player-modal" class="hidden overlay-widget"
+        style="flex-direction: column; background: rgba(0,0,0,0.9);">
+        <button id="close-quran" class="icon-btn-floating" style="top: 20px; right: 20px; color: white;">×</button>
+        <h2 id="quran-player-title" style="color: var(--neon-cyan); margin-bottom: 5px;">القرآن الكريم</h2>
+
+        <!-- V11.0: Multi-Reciter Selector -->
+        <div style="margin-bottom: 15px; width: 80%; text-align: center;">
+            <select id="reciter-select"
+                style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; font-family: var(--font-ar); font-size: 1.1rem; outline: none;">
+                <option value="">جاري تحميل القراء...</option>
+            </select>
+        </div>
+
+        <div class="quran-controls" style="text-align: center; margin-bottom: 20px;">
+            <h3 id="quran-surah-name" style="color: white;">السورة: --</h3>
+            <audio id="quran-audio-player" controls style="width: 100%; margin-top: 15px;"
+                crossorigin="anonymous"></audio>
+        </div>
+
+        <div class="surah-list" id="surah-list"
+            style="overflow-y: scroll !important; max-height: 65vh; width: 85%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 10px; pointer-events: auto !important;">
+            <!-- Surahs generated by JS -->
+        </div>
+    </div>
+
+    <!-- Settings Modal (Re-organized) -->
+    <div id="settings-modal" class="hidden">
+        <div class="settings-content">
+            <button id="close-settings">×</button>
+            <h2 style="display: flex; justify-content: space-between; align-items: center;">
+                <span data-i18n="settings">الإعدادات</span>
+                <span style="font-size: 0.8rem; opacity: 0.6;">V.39 FIX BOARD - SUCCESS</span>
+            </h2>
+
+            <!-- V36.5 Fix: Lock moved to Top for visibility -->
+            <div class="flex-between" style="background: rgba(0,229,255,0.2); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0,229,255,0.3);">
+                <label style="font-weight: bold; font-size: 1.3rem; color: #fff;">✅ تثبيت أماكن الودجات (Verrouiller Layout)</label>
+                <input type="checkbox" id="layout-locked-toggle" style="width: 50px; height: 50px; cursor: pointer;">
+            </div>
+
+            <!-- MASJID MODE MASTER CONTROLS (V38.6) -->
+            <div class="settings-section" style="border: 2px solid var(--accent-color); background: rgba(255,215,0,0.05);">
+                <h3 style="color: var(--accent-color);">🕌 تفعيل وضع المسجد (Masjid Mode)</h3>
+                <div class="flex-between" style="margin-bottom: 10px;">
+                    <label>تفعيل وضع المسجد (Mode Masjid)</label>
+                    <input type="checkbox" id="masjid-mode-toggle" checked style="width: 35px; height: 35px;">
+                </div>
+                <div class="flex-between" style="margin-bottom: 10px;">
+                    <label>بقاء الودجات (Widgets Permanents)</label>
+                    <input type="checkbox" id="permanent-widgets-toggle" checked style="width: 35px; height: 35px;">
+                </div>
+                <div class="flex-between" style="margin-bottom: 10px;">
+                    <label>وضع الساعة المصغرة (Horloge Discrète)</label>
+                    <input type="checkbox" id="discrete-clock-toggle" style="width: 35px; height: 35px;">
+                </div>
+                <div class="flex-between" style="margin-bottom: 10px; background: rgba(0,255,0,0.1); padding: 5px; border-radius: 5px;">
+                    <label>وقت صلاة الجمعة (Heure Jumu'ah)</label>
+                    <input type="time" id="jumuah-time-input" value="13:30" style="width: 100px; background: #222; color: white; padding: 5px; border-radius: 5px; border: 1px solid #444;">
+                </div>
+                
+                <!-- NEW: Imam Board 5-Page Config UI -->
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(255,215,0,0.2);">
+                    <h4 id="mas-board-title-label" style="color: var(--accent-color); margin-top: 0;" data-i18n="mas_board_title">👨‍🏫 إعدادات لوحة الإمام (5 صفحات)</h4>
+                    <div id="imam-pages-container">
+                        <!-- Pages will be injected by JS, now without internal scroll -->
+                    </div>
+                    <div class="flex-between" style="margin-top: 15px;">
+                        <label>مساحة الأمان (3 دقائق قبل الأذان)</label>
+                        <input type="number" id="imam-board-safety" value="3" min="0" max="30" style="width: 60px; background: #222; color: white; padding: 5px; border-radius: 5px;">
+                    </div>
+                </div>
+
+                <!-- USB Background for Masjid Athan Overlay -->
+                <div style="margin-top: 15px; background: rgba(0,229,255,0.05); padding: 12px; border-radius: 10px; border: 1px dashed rgba(0,229,255,0.4);">
+                    <label style="color: #00e5ff; font-size: 0.9rem; display: block; margin-bottom: 8px;">🖼️ خلفية شاشة الأذان</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="real-file-btn" style="flex:1; background:rgba(0,229,255,0.15); color:#00e5ff; border:1px solid #00e5ff; border-radius:6px; padding:10px; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; gap:8px; position:relative;">
+                            <span>📂 اختر صورة من المخزن</span>
+                            <input type="file" accept="*/*" onchange="handleMasjidAthanBg(this.files[0])" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                        </div>
+                        <button onclick="resetMasjidAthanBg()" class="small-btn" title="Réinitialiser">❌</button>
+                    </div>
+                    <div id="masjid-athan-bg-name" style="font-size:0.7rem; color:#aaa; margin-top:4px;">Aucune image</div>
+                </div>
+
+                <div class="flex-row" style="gap: 10px; margin-top: 15px;">
+                    <button id="test-athan-btn" class="lang-btn" style="flex: 1; background: var(--neon-cyan); color: black;">🔔 تجربة تسلسل الأذان (Test Athan)</button>
+                    <button id="imam-mode-btn" class="lang-btn" style="flex: 1; background: var(--accent-color); color: black;">👨‍🏫 لوحة الإمام (Lancer Board)</button>
+                </div>
+                <button onclick="checkSlideshowMode(true).then(()=>showToast('✅ Slides Jumu\'ah activées'))" class="lang-btn" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #2e7d32, #66bb6a); color: white; font-size: 1rem;">
+                    🕌 تفعيل slides الجمعة الآن (Force Jumu'ah)
+                </button>
+            </div>
+
+
+            <div class="settings-unified-container">
+                <!-- Section 1: Localization & Display -->
+                <div class="settings-section">
+                    <h3>📍 المدينة والعرض</h3>
+                    <div class="input-group-col">
+                        <label>المدينة والبلد</label>
+                        <input type="text" id="city-input" placeholder="مثال: سطيف، الجزائر"
+                            style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-family: var(--font-ar); font-size: 1.2rem;">
+                        <button id="save-city-btn" class="lang-btn" style="width: 100%; margin-top: 5px;">تغيير
+                            المدينة</button>
+
+                    </div>
+
+
+                    <div class="input-group-col" style="margin-top: 15px;">
+                        <label>شعار / أيقونة التطبيق (صورة/GIF)</label>
+                        <div class="flex-row">
+                            <input type="file" id="app-logo-input" accept="*/*">
+                            <button onclick="resetLogo()" class="small-btn" title="Reset">❌</button>
+                        </div>
+                        <span id="app-logo-name" class="file-name"></span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <div>
+                            <label>اللغة / Langue / Language</label>
+                            <select id="lang-select" class="full-select">
+                                <option value="ar">العربية (Arabic)</option>
+                                <option value="fr">Français (French)</option>
+                                <option value="en">English</option>
+                                <option value="tr">Türkçe (Turkish)</option>
+                                <option value="id">Bahasa Indonesia</option>
+                                <option value="ur">اردو (Urdu)</option>
+                                <option value="es">Español (Spanish)</option>
+                                <option value="zh">中文 (Chinese)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>الخط / Police</label>
+                            <select id="font-select" class="full-select">
+                                <option value="aref">عارف رقعة (خط عربي)</option>
+                                <option value="cairo">كايرو (خط قياسي)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>اتجاه أوقات الصلاة</label>
+                            <select id="orientation-select" class="full-select" onchange="if(typeof updatePrayerListOrientation === 'function') updatePrayerListOrientation(this.value);">
+                                <option value="column">عمودي (Vertical)</option>
+                                <option value="row">أفقي (Horizontal)</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <!-- Night Mode / Eye Protection (V14.2: Range Slider) -->
+                <div class="settings-section">
+                    <h3>🌙 وضع الراحة / Mode Nuit</h3>
+                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                        <label style="display: block; margin-bottom: 10px;">شدة حماية العين (Eye Protection
+                            Intensity)</label>
+                        <input type="range" id="eye-protection-range" min="0" max="100" value="0"
+                            style="width: 100%; height: 10px; border-radius: 5px; background: #444; outline: none; transition: 0.3s; cursor: pointer;">
+                        <div
+                            style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.8rem; color: #aaa;">
+                            <span>Off</span>
+                            <span id="eye-value-display">0%</span>
+                            <span>Max</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Prayer Times & Media (Consolidated V12) -->
+                <div class="settings-section">
+                    <h3>🕌 أوقات الصلاة & الوسائط</h3>
+                    <div class="offset-item" style="margin-bottom: 20px;">
+                        <label>طريقة الحساب / Méthode de Calcul</label>
+                        <select id="calc-method-select" class="full-select">
+                            <option value="8">وزارة الشؤون الدينية (الجزائر)</option>
+                            <option value="3">رابطة العالم الإسلامي</option>
+                            <option value="2">الجمعية الإسلامية لأمريكا الشمالية (ISNA)</option>
+                            <option value="4">جامعة أم القرى (مكة)</option>
+                            <option value="12">اتحاد المنظمات الإسلامية في فرنسا (UOIF)</option>
+                            <option value="5">الهيئة العامة المصرية للمساحة</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label>تعديل التاريخ الهجري (أيام +/-)</label>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                            <button
+                                onclick="CONFIG.hijriOffset=parseInt(CONFIG.hijriOffset||0)-1; document.getElementById('hijri-offset').value=CONFIG.hijriOffset; updateClock(); saveSettings();"
+                                style="width:50px; height:44px; font-size:1.6rem; background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); border-radius:8px; cursor:pointer;">−</button>
+                            <input type="number" id="hijri-offset" value="0"
+                                style="width:80px; text-align:center; padding:8px; border-radius:5px; font-size:1.3rem;"
+                                oninput="CONFIG.hijriOffset=parseInt(this.value)||0; updateClock(); saveSettings();"
+                                onchange="CONFIG.hijriOffset=parseInt(this.value)||0; updateClock(); saveSettings();">
+                            <button
+                                onclick="CONFIG.hijriOffset=parseInt(CONFIG.hijriOffset||0)+1; document.getElementById('hijri-offset').value=CONFIG.hijriOffset; updateClock(); saveSettings();"
+                                style="width:50px; height:44px; font-size:1.6rem; background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); border-radius:8px; cursor:pointer;">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Container for Prayers (Offsets + Athan + Cadres) -->
+                    <div id="prayer-config-container"></div>
+
+                </div>
+
+                <!-- Section 4: Athkars & Quran Reorganized (V9.0.0) -->
+                <div class="settings-section">
+                    <h3>📖 الأذكار</h3>
+                    <div class="athkar-list">
+                        <!-- 1. Wake-up -->
+                        <div class="athkar-item">
+                            <label>الاستيقاظ من النوم</label>
+                            <div class="flex-row">
+                                <input type="time" id="time-wakeup">
+                                <div class="real-file-btn small-btn" style="padding: 5px 10px; min-height: 30px; position:relative; display:flex; align-items:center; justify-content:center;">
+                                    <span>📂</span>
+                                    <input type="file" id="file-wakeup" accept="*/*" class="athkar-file-input" data-key="wakeup" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                                </div>
+                                <button onclick="testAthkar('wakeup')" class="small-btn">▶️</button>
+                                <button onclick="resetAthkarFile('wakeup')" class="small-btn">❌</button>
+                            </div>
+                            <span id="name-file-wakeup" class="file-name"></span>
+                        </div>
+                        <!-- 2. Morning -->
+                        <div class="athkar-item">
+                            <label>أذكار الصباح</label>
+                            <div class="flex-row">
+                                <input type="time" id="time-morning">
+                                <div class="real-file-btn small-btn" style="padding: 5px 10px; min-height: 30px; position:relative; display:flex; align-items:center; justify-content:center;">
+                                    <span>📂</span>
+                                    <input type="file" id="file-morning" accept="*/*" class="athkar-file-input" data-key="morning" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                                </div>
+                                <button onclick="testAthkar('morning')" class="small-btn">▶️</button>
+                                <button onclick="resetAthkarFile('morning')" class="small-btn">❌</button>
+                            </div>
+                            <span id="name-file-morning" class="file-name"></span>
+                        </div>
+                        <!-- 3. Evening -->
+                        <div class="athkar-item">
+                            <label>أذكار المساء</label>
+                            <div class="flex-row">
+                                <input type="time" id="time-evening">
+                                <div class="real-file-btn small-btn" style="padding: 5px 10px; min-height: 30px; position:relative; display:flex; align-items:center; justify-content:center;">
+                                    <span>📂</span>
+                                    <input type="file" id="file-evening" accept="*/*" class="athkar-file-input" data-key="evening" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                                </div>
+                                <button onclick="testAthkar('evening')" class="small-btn">▶️</button>
+                                <button onclick="resetAthkarFile('evening')" class="small-btn">❌</button>
+                            </div>
+                            <span id="name-file-evening" class="file-name"></span>
+                        </div>
+                        <!-- 4. Sleep -->
+                        <div class="athkar-item">
+                            <label>أذكار النوم</label>
+                            <div class="flex-row">
+                                <input type="time" id="time-sleep">
+                                <div class="real-file-btn small-btn" style="padding: 5px 10px; min-height: 30px; position:relative; display:flex; align-items:center; justify-content:center;">
+                                    <span>📂</span>
+                                    <input type="file" id="file-sleep" accept="*/*" class="athkar-file-input" data-key="sleep" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                                </div>
+                                <button onclick="testAthkar('sleep')" class="small-btn">▶️</button>
+                                <button onclick="resetAthkarFile('sleep')" class="small-btn">❌</button>
+                            </div>
+                            <span id="name-file-sleep" class="file-name"></span>
+                        </div>
+                        <!-- 5. Friday (Kahf) -->
+                        <div class="athkar-item">
+                            <label>ذكر يوم الجمعة (سورة الكهف)</label>
+                            <div class="flex-row">
+                                <input type="time" id="time-kahf">
+                                <div class="real-file-btn small-btn" style="padding: 5px 10px; min-height: 30px; position:relative; display:flex; align-items:center; justify-content:center;">
+                                    <span>📂</span>
+                                    <input type="file" id="file-kahf" accept="*/*" class="athkar-file-input" data-key="kahf" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                                </div>
+                                <button onclick="testAthkar('kahf')" class="small-btn">▶️</button>
+                                <button onclick="resetAthkarFile('kahf')" class="small-btn">❌</button>
+                            </div>
+                            <span id="name-file-kahf" class="file-name"></span>
+                        </div>
+                        <!-- 6. Al-Mulk -->
+                        <div class="athkar-item">
+                            <label>سورة الملك (Al-Mulk)</label>
+                            <div class="flex-row">
+                                <input type="time" id="time-mulk">
+                                <div class="real-file-btn small-btn" style="padding: 5px 10px; min-height: 30px; position:relative; display:flex; align-items:center; justify-content:center;">
+                                    <span>📂</span>
+                                    <input type="file" id="file-mulk" accept="*/*" class="athkar-file-input" data-key="mulk" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                                </div>
+                                <button onclick="testAthkar('mulk')" class="small-btn">▶️</button>
+                                <button onclick="resetAthkarFile('mulk')" class="small-btn">❌</button>
+                            </div>
+                            <span id="name-file-mulk" class="file-name"></span>
+                        </div>
+                        <div class="athkar-item" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                            <label>صورة أذكار الصباح (Sabah)</label>
+                            <div class="flex-row">
+                                <div class="real-file-btn small-btn" style="padding: 5px 10px; min-height: 30px; position:relative; display:flex; align-items:center; justify-content:center;">
+                                    <span>📂</span>
+                                    <input type="file" id="file-morning-bg" accept="*/*" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                                </div>
+                                <button onclick="resetAthkarBg('morning')" class="small-btn">❌</button>
+                            </div>
+                        </div>
+                        <div class="athkar-item">
+                            <label>صورة أذكار المساء (Masaa)</label>
+                            <div class="flex-row">
+                                <div class="real-file-btn small-btn" style="padding: 5px 10px; min-height: 30px; position:relative; display:flex; align-items:center; justify-content:center;">
+                                    <span>📂</span>
+                                    <input type="file" id="file-evening-bg" accept="*/*" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                                </div>
+                                <button onclick="resetAthkarBg('evening')" class="small-btn">❌</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="open-quran-player-btn" class="lang-btn"
+                        style="width:100%; margin-top:10px; background: var(--accent-color); color: black;">فتح المصحف
+                        الشريف</button>
+                </div>
+
+                <!-- Section 5: Customized Tasbihs -->
+                <div class="settings-section">
+                    <h3>📿 تسبيح مخصص</h3>
+                    <div class="input-group-col">
+                        <input type="text" id="tasbih-input" placeholder="مثال: سبحان الله"
+                            style="width:100%; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; color: white; border: 1px solid rgba(255,255,255,0.2); font-family: var(--font-ar); font-size: 1.4rem;">
+                        <button id="add-tasbih-btn" class="lang-btn" style="width:100%; margin-top:5px;">إضافة</button>
+                    </div>
+                    <div id="tasbih-list-edit"
+                        style="margin-top:10px; max-height: 250px; overflow-y:auto; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                        <!-- List of tasbihs with delete buttons generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Section 6: Backgrounds (Optimized Facilité) -->
+                <div class="settings-section">
+                    <h3>🖼️ الخلفيات (Diaporama)</h3>
+
+                    <div class="bg-action-buttons">
+                        <div class="action-btn add-btn" style="cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; position:relative;">
+                            <span>📷 إضافة صور</span>
+                            <input type="file" multiple accept="*/*" onchange="handleBgFiles(this.files)" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+                        </div>
+                        <button id="clear-bg-btn" class="action-btn clear-btn">
+                            <span>🗑️</span> مسح الكل
+                        </button>
+                    </div>
+
+                    <div class="bg-status-bar">
+                        <span id="bg-count">0 ملفات sélectionner</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-size: 0.85rem;">التبديل كل:</label>
+                            <select id="slideshow-interval-select"
+                                style="background:#222; color: gold; border: 1px solid #444; border-radius: 4px; padding: 2px;">
+                                <option value="15">15 ث</option>
+                                <option value="30">30 ث</option>
+                                <option value="60">1 د</option>
+                                <option value="300">5 د</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="bg-grid" id="bg-grid"></div>
+                </div>
+
+                <!-- Section 7: Système -->
+                <div class="settings-section">
+                    <h3 style="color: var(--neon-cyan);">⚙️ النظام</h3>
+                    <div class="flex-between">
+                        <label>ترك الشاشة مفعلة (Wake Lock)</label>
+                        <button id="toggle-wake" class="small-btn">معطل</button>
+                    </div>
+                    <!-- V11.4: Factory Reset -->
+                    <button id="factory-reset-btn" class="small-btn"
+                        style="width:100%; margin-top:15px; background: rgba(255,50,50,0.2); border: 1px solid #ff4444; color: #ff4444;">
+                        استعادة إعدادات المصنع (Réinitialiser)
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📢 شارك التطبيق (Partager APK)</h3>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 10px;">Partagez l'application via
+                        WhatsApp, Messenger ou d'autres applications.</p>
+                    <button onclick="shareApp()" class="lang-btn"
+                        style="width:100%; height: 60px; background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; font-weight: bold; border-radius: 12px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; position: relative; z-index: 100;">
+                        <span>🚀 Partager via WhatsApp / Messenger</span>
+                    </button>
+                </div>
+                </div>
+            </div> <!-- end grid container -->
+        </div> <!-- end content -->
+    </div> <!-- end modal -->
+
+    <!-- Universal Share Modal (APK Download) -->
+    <div id="share-modal" class="hidden overlay-widget" style="display:none; flex-direction: column; background: rgba(0,0,0,0.9); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000000; justify-content: center; align-items: center;">
+        <div style="background: var(--glass-bg); padding: 40px; border-radius: 20px; border: 1px solid var(--glass-border); text-align: center; max-width: 500px; position: relative; backdrop-filter: blur(10px);">
+            <button id="close-share" onclick="closeShareModal()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: white; font-size: 2.5rem; cursor: pointer;">×</button>
+            <h2 id="share-modal-title" style="color: var(--neon-cyan); margin-bottom: 20px;" data-i18n="share_app">تحميل التطبيق (Télécharger APK)</h2>
+            
+            <!-- V38.6: Direct Link Display (Optimized for TV) -->
+            <div id="apk-link-container" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(0, 229, 255, 0.2);">
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 10px;">Lien de téléchargement direct :</p>
+                <div id="apk-link" style="color: #00e5ff; font-family: monospace; font-size: 1.1rem; word-break: break-all; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;"></div>
+            </div>
+
+            <button onclick="shareApp()" class="lang-btn" style="width: 100%; height: 60px; background: linear-gradient(135deg, #25D366, #128C7E); color: white; font-size: 1.2rem; border-radius: 12px; border: none; cursor: pointer;">
+                🚀 Copier le lien / Partager
+            </button>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 15px;">Le lien sera copié dans le presse-papier si le partage n'est pas automatique.</p>
+        </div>
+    </div>
+
+    <!-- Weather Forecast Modal -->
+    <div id="weather-forecast-modal">
+        <button id="close-weather-forecast" class="icon-btn-floating" style="top: 20px; right: 20px;">×</button>
+        <div class="forecast-container">
+            <h2 style="text-align: center; font-size: 1.8rem; color: var(--accent-color); margin-top: 10px;">حالة الطقس
+                المتوقعة</h2>
+
+            <div>
+                <h3 class="forecast-section-title">التوقعات لـ 24 ساعة القادمة</h3>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <button class="nav-btn-scroll"
+                        onclick="document.getElementById('hourly-forecast').scrollBy({left: -150, behavior: 'smooth'})">‹</button>
+                    <div id="hourly-forecast" class="forecast-scroll-x">
+                        <!-- Hourly items injected by JS -->
+                    </div>
+                    <button class="nav-btn-scroll"
+                        onclick="document.getElementById('hourly-forecast').scrollBy({left: 150, behavior: 'smooth'})">›</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="forecast-section-title">التوقعات لـ 5 أيام القادمة</h3>
+                <div id="daily-forecast">
+                    <!-- Daily items injected by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stop Audio Button (Floating) -->
+    <!-- Stop Audio Button (Floating, Discrete) -->
+
+    <!-- Custom Confirmation Modal (V11.5) -->
+
+    <div id="confirm-modal" class="hidden">
+        <div class="confirm-content">
+            <h3 id="confirm-title" style="color: var(--accent-color); margin-bottom: 20px;">هل أنت متأكد؟</h3>
+            <p id="confirm-msg" style="margin-bottom: 25px;">سيتم استعادة إعدادات المصنع ومسح جميع التغييرات.</p>
+            <div class="confirm-btns">
+                <button id="confirm-yes" class="confirm-btn-yes">نعم، متأكد</button>
+                <button id="confirm-no" class="confirm-btn-no">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Athkar Ticker (Bottom) -->
+    <div id="athkar-ticker" class="draggable-item">
+        <span id="ticker-text">Subhanallah • Alhamdulillah • La ilaha illa Allah • Allahu Akbar</span>
+    </div>
+
+    <!-- Stop Audio Button (Athkar/MP3) -->
+    <!-- Stop Audio Button (Athkar/MP3) -->
+    <button id="stop-athkar" class="hidden">⏹️</button>
+
+    <div id="stop-mp3-btn" class="draggable-item" style="position: fixed; bottom: 80px; left: 20px; z-index: 9999; background: rgba(255, 0, 0, 0.3); padding: 10px; border-radius: 50%; color: white; cursor: pointer; display: none;">
+        ⏹️
+    </div>
+
+    <!-- V4 Badge Removed -->
+    <!-- CORE LOGIC V5 -->
+
+    
+
+    <!-- TV REMOTE CONTROL SCRIPT -->
+    
+
+    
+
+    <!-- Fasting Widget Placeholder (Moved to top) -->
+    
+
+
+
+    <!-- ============================================================ -->
+    <!-- MASJID MODE COMPONENTS (V38.6)                               -->
+    <!-- ============================================================ -->
+    
+    <!-- Masjid Athan Sequence Overlay -->
+    <div id="masjid-athan-overlay" >
+        <div id="masjid-athan-content">
+            <div id="masjid-athan-call-info">
+                <span id="masjid-athan-status">وقت الأذان</span>
+                <h2 id="masjid-athan-prayer-name">---</h2>
+            </div>
+            <div id="masjid-athan-duaa" >
+                <p>اللهم رب هذه الدعوة التامة، والصلاة القائمة، آت محمداً الوسيلة والفضيلة، وابعثه مقاماً محموداً الذي وعدته</p>
+            </div>
+        </div>
+        <div class="masjid-progress-container">
+            <div id="masjid-progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- Iqama Overlay -->
+    <div id="iqama-overlay" >
+        <div class="iqama-content">
+            <div class="iqama-phrase" id="iqama-p1"></div>
+            <div class="iqama-phrase" id="iqama-p2"></div>
+            <div class="iqama-phrase" id="iqama-p3"></div>
+        </div>
+    </div>
+
+    <!-- Salat Qaima Overlay -->
+    <div id="salat-qaima-overlay" >
+        <div class="salat-qaima-content">
+            <div class="salat-qaima-phrase" id="sq-p1"></div>
+            <div class="salat-qaima-phrase" id="sq-p2"></div>
+            <div class="salat-qaima-phrase" id="sq-p3"></div>
+        </div>
+    </div>
+
+    <!-- NOUVELLE STRUCTURE INDEPENDANTE MASJID (V39.1.0) -->
+    <div id="masjid-root" class="masjid-root-container hidden">
+        <div id="imam-board" class="masjid-imam-layer">
+            <!-- Injecté via JS -->
+        </div>
+        <div class="masjid-board-nav" id="board-nav-dots"></div>
+        <button id="close-board-btn" class="masjid-close-btn hidden"></button>
+    </div>
+
+    <!-- WIDGETS MASJID GLOBAUX (Hors de masjid-root pour survivre partout) -->
+    <div id="masjid-persistent-widgets" class="masjid-widgets-layer hidden">
+        <div class="masjid-mini-widget">
+            <span id="mini-clock-time" class="masjid-mini-clock">--:--</span>
+        </div>
+        <div class="masjid-mini-widget">
+            <span class="masjid-mini-label">الصلاة القادمة</span>
+            <div class="masjid-mini-prayer" id="mini-next-prayer">--:--</div>
+        </div>
+    </div>
+
+    <script src="assets/js/adhan.js?v=39.1.01"></script>
+    <script src="assets/js/constants.js?v=39.1.01"></script>
+    <script src="assets/js/utils.js?v=39.1.01"></script>
+    <script src="assets/js/services.js?v=39.1.01"></script>
+    <script src="assets/js/widgets.js?v=39.1.01"></script>
+    <script src="assets/js/visualizer.js?v=39.1.01"></script>
+    <script src="assets/js/logic_v2.js?v=39.1.01" defer></script>
+    <script>
+  document.addEventListener('keydown', function(e) {
+    const key = e.key;
+    const active = document.activeElement;
+    // On cible 'x', 'X', 'Delete' et 'Backspace' pour couvrir toutes les télécommandes
+    if ((key === 'x' || key === 'X' || key === 'Delete' || key === 'Backspace') && active && active.tagName === 'INPUT') {
+      active.value = '';
+      active.dispatchEvent(new Event('input', { bubbles: true }));
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+</script>
+
+  <div id="debug-error-log" style="position: fixed; top: 10px; left: 10px; z-index: 1000000; background: rgba(0,0,0,0.8); color: #ff5555; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 14px; max-width: 80%; display: none;"></div>
+</body>
+
+</html>
