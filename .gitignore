@@ -7,3 +7,4 @@ node_modules/
 .DS_Store
 cordova.js
 cordova_plugins.js
+*.idsig
