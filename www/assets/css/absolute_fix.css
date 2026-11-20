@@ -1,0 +1,80 @@
+
+/* ========================================================================== */
+/* MASJID MODE - ABSOLUTE POSITIONING FIX (V40.6)                             */
+/* ========================================================================== */
+
+/* 1. PERSISTENT WIDGETS - TOP RIGHT, TRANSPARENT, NATIVE STACKING */
+#masjid-persistent-widgets {
+    position: fixed !important;
+    top: 50px !important;
+    right: 50px !important;
+    z-index: 9999999 !important;
+    display: none;
+    text-align: right !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.masjid-mini-widget {
+    background: transparent !important;
+    border: none !important;
+    display: block !important;
+    margin-bottom: 20px !important;
+}
+
+.masjid-mini-clock {
+    font-size: 3.5rem !important;
+    color: white !important;
+    font-weight: bold !important;
+}
+
+.masjid-mini-prayer {
+    font-size: 2.4rem !important;
+    color: #ffd700 !important;
+}
+
+/* 2. ABSOLUTE CENTERING FOR OVERLAYS (OLD SCHOOL METHOD) */
+#masjid-athan-content, 
+.iqama-content, 
+.salat-qaima-content {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 100% !important;
+    text-align: center !important;
+    display: block !important;
+}
+
+#masjid-athan-status, 
+#masjid-athan-prayer-name, 
+.iqama-phrase, 
+.salat-qaima-phrase {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 15px 0 !important;
+}
+
+#masjid-athan-status { font-size: 2.8rem !important; color: var(--accent-color) !important; }
+#masjid-athan-prayer-name { font-size: 5rem !important; color: white !important; }
+#masjid-athan-duaa p { font-size: 2.8rem !important; color: #ffd700 !important; line-height: 1.6; max-width: 85%; margin: 0 auto; }
+
+/* 3. DYNAMIC HIDING (MINUTE 2) */
+.masjid-step-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* 4. SALAT QAIMA & IQAMA CENTERING */
+#iqama-p2, #sq-p1 {
+    text-align: center !important;
+    width: 100% !important;
+}
+
+/* 5. BLACK OVERLAYS */
+#masjid-athan-overlay, #educational-board-overlay {
+    background: #000000 !important;
+    z-index: 5000000 !important;
+}

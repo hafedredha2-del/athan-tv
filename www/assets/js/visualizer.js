@@ -1,0 +1,228 @@
+/**
+ * AudioVisualizer — FIX v1.1.2 (Athan TV)
+ *
+ * ✅ Bug 1 fixé : arc des secondes animé en temps réel via RAF autonome (_clockLoop)
+ * ✅ Bug 2 fixé : barres radiales égaliseur UNIQUEMENT pendant la lecture audio
+ *                 Rayon de départ = 103 px (bord exact du cercle horloge Ø200px dans canvas 260px)
+ *                 Effet transparent (alpha < 1) pour ne pas masquer l'arrière-plan
+ *
+ * Géométrie canvas :
+ *   - canvas.width = canvas.height = 260 px  → centre CX = CY = 130 px
+ *   - .clock-plasma  Ø = 200 px              → rayon bord = 100 px
+ *   - Barres égaliseur : départ r = 103 px, longueur max = 28 px vers l'extérieur
+ *   - Arc secondes    : rayon = 97 px (légèrement en-deçà du bord)
+ */
+const AudioVisualizer = {
+
+    /* ── état ────────────────────────────────────────────────── */
+    audioCtx:      null,
+    analyser:      null,
+    canvas:        null,
+    canvasCtx:     null,
+    dataArray:     null,
+    bufferLength:  32,
+    pendingSources: [],
+    isActive:      false,   // true ⟺ audio en cours de lecture
+    _drawLoop:     null,    // RAF id boucle égaliseur
+    _clockLoop:    null,    // RAF id boucle secondes (toujours active)
+
+    /* ── constantes géométriques ─────────────────────────────── */
+    CX:        130,   // centre X du canvas
+    CY:        130,   // centre Y du canvas
+    R_ARC:      97,   // rayon de l'arc des secondes (interne au bord horloge)
+    R_EQ_START: 97,  // rayon de départ des barres égaliseur (bord externe horloge)
+    R_EQ_MAX:    28,  // longueur max des barres (px vers l'extérieur)
+    NB_BARS:     32,  // nombre de barres réparties sur 360°
+
+    /* ═══════════════════════════════════════════════════════════
+       INITIALISATION
+    ═══════════════════════════════════════════════════════════ */
+    init: function () {
+        this.canvas = document.getElementById('visualizer-canvas');
+        if (!this.canvas) return;
+        this.canvasCtx = this.canvas.getContext('2d', { alpha: true });
+        this.canvas.width  = 260;
+        this.canvas.height = 260;
+        this._startClockLoop();   // démarrer l'arc des secondes immédiatement
+        console.log('[AudioVisualizer] v1.1.2 initialisé.');
+    },
+
+    /* ═══════════════════════════════════════════════════════════
+       BOUCLE ARC DES SECONDES (permanente, indépendante de l'audio)
+    ═══════════════════════════════════════════════════════════ */
+    _startClockLoop: function () {
+        var self = this;
+        (function tick() {
+            if (!self.isActive) {
+                // Hors audio → on efface et on dessine uniquement l'arc
+                var ctx = self.canvasCtx;
+                if (ctx) {
+                    ctx.clearRect(0, 0, 260, 260);
+                    self._paintSecondsArc(ctx);
+                }
+            }
+            // Pendant l'audio, _drawAnimated() s'occupe de tout (efface + arc + barres)
+            self._clockLoop = requestAnimationFrame(tick);
+        }());
+    },
+
+    /**
+     * Dessine l'arc cyan des secondes sur le contexte fourni.
+     * Utilise seconds + millisecondes pour une progression lisse.
+     */
+    _paintSecondsArc: function (ctx) {
+        var now      = new Date();
+        var progress = (now.getSeconds() + now.getMilliseconds() / 1000) / 60;
+        var cx = this.CX, cy = this.CY, r = this.R_ARC;
+        var startA   = -Math.PI / 2;                       // 12h
+        var endA     = startA + progress * 2 * Math.PI;
+
+        /* arc des secondes très transparent pour préserver l'arrière-plan */
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, startA, endA, false);
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.22)';
+        ctx.lineWidth   = 1.5;
+        ctx.lineCap     = 'round';
+        ctx.stroke();
+
+        /* repère discret en tête sans halo envahissant */
+        var hx = cx + r * Math.cos(endA);
+        var hy = cy + r * Math.sin(endA);
+        ctx.beginPath();
+        ctx.arc(hx, hy, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.35)';
+        ctx.fill();
+    },
+
+    /* ═══════════════════════════════════════════════════════════
+       WEB AUDIO API
+    ═══════════════════════════════════════════════════════════ */
+    unlockAudio: function () {
+        if (this.audioCtx) return;
+        try {
+            var Ctx = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = new Ctx();
+            this.analyser = this.audioCtx.createAnalyser();
+            this.analyser.fftSize = 64;
+            this.bufferLength = this.analyser.frequencyBinCount;
+            this.dataArray    = new Uint8Array(this.bufferLength);
+            var self = this;
+            this.pendingSources.forEach(function (s) { self.connectSource(s); });
+            this.pendingSources = [];
+            console.log('[AudioVisualizer] AudioContext déverrouillé.');
+        } catch (e) {
+            console.error('[AudioVisualizer] Web Audio API non supporté :', e);
+        }
+    },
+
+    connectSource: function (el) {
+        if (!el) return null;
+        if (!this.audioCtx) {
+            if (!this.pendingSources.includes(el)) this.pendingSources.push(el);
+            return null;
+        }
+        if (el._vizConnected) return null;
+        try {
+            el.crossOrigin = 'anonymous';
+            var src = this.audioCtx.createMediaElementSource(el);
+            src.connect(this.audioCtx.destination);
+            src.connect(this.analyser);
+            el._vizConnected = true;
+            var self = this;
+            el.addEventListener('play',  function () { self.startDrawing(); });
+            el.addEventListener('pause', function () { self.stopDrawing();  });
+            el.addEventListener('ended', function () { self.stopDrawing();  });
+            console.log('[AudioVisualizer] Source connectée.');
+            return src;
+        } catch (e) {
+            console.error('[AudioVisualizer] Erreur connexion source :', e);
+            return null;
+        }
+    },
+
+    /* ═══════════════════════════════════════════════════════════
+       CONTRÔLE DE LA BOUCLE ÉGALISEUR
+    ═══════════════════════════════════════════════════════════ */
+    startDrawing: function () {
+        if (this.isActive) return;
+        this.isActive = true;
+        if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        this._drawAnimated();
+    },
+
+    stopDrawing: function () {
+        this.isActive = false;
+        if (this._drawLoop) {
+            cancelAnimationFrame(this._drawLoop);
+            this._drawLoop = null;
+        }
+        // _clockLoop continue à dessiner uniquement l'arc des secondes
+    },
+
+    /* ═══════════════════════════════════════════════════════════
+       BOUCLE ANIMÉE — ÉGALISEUR + ARC (pendant l'audio)
+    ═══════════════════════════════════════════════════════════ */
+    _drawAnimated: function () {
+        if (!this.isActive) return;
+        var self = this;
+        this._drawLoop = requestAnimationFrame(function () { self._drawAnimated(); });
+
+        var ctx = this.canvasCtx;
+        if (!ctx || !this.analyser || !this.dataArray) return;
+
+        this.analyser.getByteFrequencyData(this.dataArray);
+
+        /* ── 1. Effacer le canvas ──────────────────────────────── */
+        ctx.clearRect(0, 0, 260, 260);
+
+        /* ── 2. Arc des secondes (toujours au premier plan) ───── */
+        this._paintSecondsArc(ctx);
+
+        /* ── 3. Effet flash transparent animé (mouvement + réactivité audio) ── */
+        var nowMs = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        var t = nowMs * 0.0032;
+
+        var nbBars = this.NB_BARS || 64;
+        var sum = 0;
+        var peak = 0;
+        var arr = this.dataArray || [];
+        for (var i = 0; i < nbBars; i++) {
+            var v = (arr[i] || 0) / 255;
+            sum += v;
+            if (v > peak) peak = v;
+        }
+        var avg = nbBars > 0 ? (sum / nbBars) : 0;
+        var audioLevel = Math.min(1, avg * 1.4 + peak * 0.8);
+
+        // Mouvement continu d'onde + impulsion réactive au son
+        var wave = 0.5 + 0.5 * Math.sin(t * 2.2);
+        var pulse = 0.5 + 0.5 * Math.sin(t * 5.1);
+        var motion = Math.min(1, audioLevel * 0.85 + wave * 0.25 + pulse * audioLevel * 0.35);
+
+        if (motion > 0.01) {
+            var cx = this.CX, cy = this.CY;
+            var rInner = Math.max(10, this.R_ARC - 10 + wave * 8);
+            var rOuter = this.R_ARC + 24 + wave * 26 + audioLevel * 65;
+
+            var grad = ctx.createRadialGradient(cx, cy, rInner, cx, cy, rOuter);
+            var alphaOuter = (0.03 + wave * 0.05 + audioLevel * 0.16).toFixed(3);
+            var alphaMid   = (0.05 + pulse * 0.06 + audioLevel * 0.20).toFixed(3);
+
+            grad.addColorStop(0.0, 'rgba(0, 229, 255, 0)');
+            grad.addColorStop(0.45, 'rgba(120, 238, 255, ' + alphaMid + ')');
+            grad.addColorStop(0.78, 'rgba(225, 200, 125, ' + alphaOuter + ')');
+            grad.addColorStop(1.0, 'rgba(0, 229, 255, 0)');
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    AudioVisualizer.init();
+});
