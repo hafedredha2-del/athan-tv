@@ -104,10 +104,14 @@ Bien que l'application soit fonctionnelle, il reste des ajustements techniques e
 🤲 **Athan TV — تكنولوجيا ذكية، تربية هادفة، وذكر مستمر.**  
 *هذا العمل مُهدى لوجه الله تعالى كصدقة جارية. دعوة لكل مطور، مربي، وكل محب للخير للمساهمة معي في إتمامه وتطويره لوجه الله.*
 
+---
+
 ## 📱 Installation sur Android TV
 
-Vous pouvez installer directement l'application sur votre téléviseur via l'application **Downloader** en saisissant le code fixe **`7919849`** ou ce lien direct de la release `v1.1.0` :
+1. Ouvrez l'application **Downloader** sur votre téléviseur Android TV.
+2. Saisissez le code **`4925361`** (ou l'adresse `aftv.news/4925361`).
+3. Sur la page de la version **`v1.1.0`** qui s'ouvre, descendez jusqu'à **Assets** et sélectionnez **`gemini-tv-athan-7919849.apk`** (~283 MB / `296364087` octets) pour lancer le téléchargement et l'installation.
 
-* **Lien direct APK :** [Télécharger Gemini TV Athan v1.1.0 (`gemini-tv-athan-7919849.apk`)](https://github.com/hafedredha2-del/athan-tv/releases/download/v1.1.0/gemini-tv-athan-7919849.apk)
-* **Taille :** ~283 MB (`296364087` octets)
-* **SHA-256 :** `5082d95632a9230c20f87765fa41b25b9aef10cc79c09f7697493106d1b6e42d`
+- **Page de release :** [Athan TV v1.1.0](https://github.com/hafedredha2-del/athan-tv/releases/tag/v1.1.0)
+- **Taille :** ~283 MB (`296364087` octets)
+- **SHA-256 :** `5082d95632a9230c20f87765fa41b25b9aef10cc79c09f7697493106d1b6e42d`
