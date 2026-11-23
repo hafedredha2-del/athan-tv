@@ -16,17 +16,17 @@ Elle a été conçue avec une vision claire : **remplir le rôle d'un enseignant
 
 ### 📖 Ce que contient déjà l'application (v1.1.0)
 
-* **🕌 Gestion avancée des 6 prières quotidiennes :** Déclenchement automatique d'Athan avec support vidéo dédié pour chaque prière (y compris le Shuruq/Lever du soleil) et personnalisation des décalages (offsets).
-* **📖 Modes d'affichage hybrides (Coran & Rappels) :** Lecture et affichage avec diaporamas spécifiques pour le vendredi (**Jumuah**) et pour le reste de la semaine.
-* **🤲 Invocations & Athkars animés :** Athkars du matin, du soir, du réveil et du sommeil avec support audio, synchronisation et texte défilant.
-* **🌙 Module Siyam (Jeûne) intelligent :** 
-  * Synchronisé sur le calendrier Hijri et démarrant rigoureusement au **Maghrib** (et non à minuit/24h).
-  * Suivi des jours de jeûne recommandés (Lundi, Jeudi, Ayam Bith, Achoura, Arafat, 6 jours de Shawwal).
-  * Affichage des fêtes religieuses avec intégration des règles de bienséance (ex: sans Mawlid Nabawi).
-* **🏛️ Mode Masjid (Mosquée) & Mode Maison (Foyer) distincts :** 
-  * **Mode Masjid :** Strictement axé sur la bienséance de la mosquée (**Adab el-Masjid**). Il intègre les **Pages Imam** personnalisables où l'Imam peut rédiger ses messages, annonces ou cours au moment voulu pour enrichir le rôle éducatif de la mosquée.
-  * **Mode Maison :** Un cadre ouvert et adaptable aux besoins spirituels et éducatifs de la famille, agissant comme un surveillant bienveillant.
-* **🌍 Outils & Interface :** Géolocalisation simplifiée pour la ville, météo en direct, widgets déplaçables et support multilingue.
+- **🕌 Gestion avancée des 6 prières quotidiennes :** Déclenchement automatique d'Athan avec support vidéo dédié pour chaque prière (y compris le Shuruq/Lever du soleil) et personnalisation des décalages (offsets).
+- **📖 Modes d'affichage hybrides (Coran & Rappels) :** Lecture et affichage avec diaporamas spécifiques pour le vendredi (**Jumuah**) et pour le reste de la semaine.
+- **🤲 Invocations & Athkars animés :** Athkars du matin, du soir, du réveil et du sommeil avec support audio, synchronisation et texte défilant.
+- **🌙 Module Siyam (Jeûne) intelligent :** 
+  - Synchronisé sur le calendrier Hijri et démarrant rigoureusement au **Maghrib** (et non à minuit/24h).
+  - Suivi des jours de jeûne recommandés (Lundi, Jeudi, Ayam Bith, Achoura, Arafat, 6 jours de Shawwal).
+  - Affichage des fêtes religieuses avec intégration des règles de bienséance (ex: sans Mawlid Nabawi).
+- **🏛️ Mode Masjid (Mosquée) & Mode Maison (Foyer) distincts :** 
+  - **Mode Masjid :** Strictement axé sur la bienséance de la mosquée (**Adab el-Masjid**). Il intègre les **Pages Imam** personnalisables où l'Imam peut rédiger ses messages, annonces ou cours au moment voulu pour enrichir le rôle éducatif de la mosquée.
+  - **Mode Maison :** Un cadre ouvert et adaptable aux besoins spirituels et éducatifs de la famille, agissant comme un surveillant bienveillant.
+- **🌍 Outils & Interface :** Géolocalisation simplifiée pour la ville, météo en direct, widgets déplaçables et support multilingue.
 
 ---
 
@@ -35,17 +35,17 @@ Elle a été conçue avec une vision claire : **remplir le rôle d'un enseignant
 Bien que l'application soit fonctionnelle, il reste des ajustements techniques et esthétiques sur lesquels la communauté des développeurs est chaleureusement invitée à contribuer :
 
 1. **🐛 Problème du sélecteur d'arrière-plan (Pages Imam & Médias) :**
-   * *Problème actuel :* Sur Android TV / WebView, la sélection d'une image locale via le sélecteur natif renvoie des URI `content://` ou des objets Blob qui ne s'affichent pas en CSS (`backgroundImage`).
-   * *Piste de correction :* Convertir l'image directement en chaîne Base64 via `FileReader.readAsDataURL` pour l'injecter directement dans le style CSS et la sauvegarder de manière persistante.
+  - *Problème actuel :* Sur Android TV / WebView, la sélection d'une image locale via le sélecteur natif renvoie des URI `content://` ou des objets Blob qui ne s'affichent pas en CSS (`backgroundImage`).
+  - *Piste de correction :* Convertir l'image directement en chaîne Base64 via `FileReader.readAsDataURL` pour l'injecter directement dans le style CSS et la sauvegarder de manière persistante.
 2. **🔵 Restauration du Cercle Bleu Animé & Égaliseur :**
-   * *Problème actuel :* Le cercle bleu animé qui entourait l'horloge et marquait le décompte des secondes, ainsi que l'égaliseur audio réactif lors de la lecture des sons/Athkars, ont été temporairement perdus lors des refontes de code.
-   * *Piste de correction :* Réintégrer proprement la logique du Canvas / CSS et de l'Equalizer audio dans `visualizer.js` / `logic_v2.js`.
+  - *Problème actuel :* Le cercle bleu animé qui entourait l'horloge et marquait le décompte des secondes, ainsi que l'égaliseur audio réactif lors de la lecture des sons/Athkars, ont été temporairement perdus lors des refontes de code.
+  - *Piste de correction :* Réintégrer proprement la logique du Canvas / CSS et de l'Equalizer audio dans `visualizer.js` / `logic_v2.js`.
 3. **💾 Persistance complète du choix des vidéos / MP3 :**
-   * S'assurer que le changement manuel des fichiers audio/vidéo par l'utilisateur (via clé USB ou stockage interne) reste 100% sauvegardé après redémarrage de la box TV.
+  - S'assurer que le changement manuel des fichiers audio/vidéo par l'utilisateur (via clé USB ou stockage interne) reste 100% sauvegardé après redémarrage de la box TV.
 4. **📦 Optimisation & Allègement de l'APK (Sans perte de fonctionnalités) :**
-   * Réduire la taille globale du fichier `.apk` tout en garantissant qu'aucune option ni ressource ne soit supprimée.
+  - Réduire la taille globale du fichier `.apk` tout en garantissant qu'aucune option ni ressource ne soit supprimée.
 5. **🔒 Protection des règles du Mode Masjid :**
-   * S'assurer que les contributions futures ne dénaturent pas la sobriété du Mode Masjid et respectent les conditions fixées pour les mosquées.
+  - S'assurer que les contributions futures ne dénaturent pas la sobriété du Mode Masjid et respectent les conditions fixées pour les mosquées.
 
 ---
 
@@ -59,8 +59,8 @@ Bien que l'application soit fonctionnelle, il reste des ajustements techniques e
 ---
 
 ### 🏛️ فلسفة التطبيق: وضعان لكل مقام مقال
-* **وضع المسجد (Masjid Mode) — التزام ووقار:** إطار دقيق ومضبوط يركز على آداب المسجد (**Adab el-Masjid**). تتيح *"صفحات الإمام"* للأئمة مساحة حرة لكتابة التوجيهات والدروس ونشر العلم، مع الالتزام التام بضوابط المسجد دون تجاوز.
-* **وضع البيت (Home Mode) — تربية وإشراف هادف:** في البيت، يتحول التطبيق إلى ما يشبه **"المُرشد أو المراقِب الرحيم"** على الأسرة؛ ليس بالإزعاج أو كثرة الإشعارات، بل بحضور هادئ ومستمر يوجه نحو التربية، والذكر، والتعلم الديني الصحيح، مع الانفتاح التام على اقتراحاتكم لتطويره.
+- **وضع المسجد (Masjid Mode) — التزام ووقار:** إطار دقيق ومضبوط يركز على آداب المسجد (**Adab el-Masjid**). تتيح *"صفحات الإمام"* للأئمة مساحة حرة لكتابة التوجيهات والدروس ونشر العلم، مع الالتزام التام بضوابط المسجد دون تجاوز.
+- **وضع البيت (Home Mode) — تربية وإشراف هادف:** في البيت، يتحول التطبيق إلى ما يشبه **"المُرشد أو المراقِب الرحيم"** على الأسرة؛ ليس بالإزعاج أو كثرة الإشعارات، بل بحضور هادئ ومستمر يوجه نحو التربية، والذكر، والتعلم الديني الصحيح، مع الانفتاح التام على اقتراحاتكم لتطويره.
 
 ---
 
@@ -69,14 +69,14 @@ Bien que l'application soit fonctionnelle, il reste des ajustements techniques e
 - تحريك العناصر وتغيير أماكنها بحرية وقفلها بعد ترتيبها لتجنب الخطأ.
 - تخصيص واجهة الاستخدام حسب رغبة المستخدم مع ثبات الإعدادات بعد إعادة التشغيل.
 
-* **🌦️ Widget الطقس:** تحديثات فورية، توقعات 24 ساعة و5 أيام، مع إمكانية عرض التفاصيل بالضغط.
-* **ﷺ Widget الصلاة على النبي ﷺ:** يظهر ابتداءً من مغرب يوم الخميس ويختفي عند دخول مغرب يوم الجمعة.
-* **🌙 Widget الصيام والتقويم الإسلامي:** 
+- **🌦️ Widget الطقس:** تحديثات فورية، توقعات 24 ساعة و5 أيام، مع إمكانية عرض التفاصيل بالضغط.
+- **ﷺ Widget الصلاة على النبي ﷺ:** يظهر ابتداءً من مغرب يوم الخميس ويختفي عند دخول مغرب يوم الجمعة.
+- **🌙 Widget الصيام والتقويم الإسلامي:** 
   - متوافق مع التقويم الهجري ويبدأ وقته بدخول **المغرب** (وليس بنظام 24 ساعة).
   - متابعة الأيام المستحبة (الاثنين، الخميس، الأيام البيض، عاشوراء، عرفة، ست من شوال).
   - مراعاة المناسبات والأعياد الإسلامية (مع تخصيص استبعاد المولد النبوي).
-* **🕌 مواقيت الصلاة والساعة:** عرض عمودي أو أفقي، متابعة الصلاة القادمة، ساعة دائرية متحركة مع مؤشر ثوانٍ وأداة تحليل الصوت (Equalizer).
-* **📶 Widget الاتصال بالإنترنت:** عرض حالة شبكة Wi-Fi ومتابعة الاتصال.
+- **🕌 مواقيت الصلاة والساعة:** عرض عمودي أو أفقي، متابعة الصلاة القادمة، ساعة دائرية متحركة مع مؤشر ثوانٍ وأداة تحليل الصوت (Equalizer).
+- **📶 Widget الاتصال بالإنترنت:** عرض حالة شبكة Wi-Fi ومتابعة الاتصال.
 
 ---
 
@@ -103,8 +103,11 @@ Bien que l'application soit fonctionnelle, il reste des ajustements techniques e
 
 🤲 **Athan TV — تكنولوجيا ذكية، تربية هادفة، وذكر مستمر.**  
 *هذا العمل مُهدى لوجه الله تعالى كصدقة جارية. دعوة لكل مطور، مربي، وكل محب للخير للمساهمة معي في إتمامه وتطويره لوجه الله.*
+
 ## 📱 Installation sur Android TV
 
-Vous pouvez installer directement l'application sur votre téléviseur via l'application **Downloader** en saisissant ce lien direct :
+Vous pouvez installer directement l'application sur votre téléviseur via l'application **Downloader** en saisissant le code fixe **`7919849`** ou ce lien direct de la release `v1.1.0` :
 
-[Télécharger Athan TV v1.1.0](https://github.com/hafedredha2-del/athan-tv/releases/download/v1.1.0/athan-tv-v1.1.0.apk)
+* **Lien direct APK :** [Télécharger Gemini TV Athan v1.1.0 (`gemini-tv-athan-7919849.apk`)](https://github.com/hafedredha2-del/athan-tv/releases/download/v1.1.0/gemini-tv-athan-7919849.apk)
+* **Taille :** ~283 MB (`296364087` octets)
+* **SHA-256 :** `5082d95632a9230c20f87765fa41b25b9aef10cc79c09f7697493106d1b6e42d`
